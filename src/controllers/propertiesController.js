@@ -83,6 +83,8 @@ export const updatePropertyStatus = async (req, res) => {
     try {
         const { propertyId, status } = req.body;
 
+        console.log(propertyId, status);
+
         if (!propertyId || !status) return res.status(400).json({ message: "Please fill all the fields" });
 
         const updateProperty = await Properties.findByIdAndUpdate({ _id: propertyId }, { verified: status }, { new: true }).lean();

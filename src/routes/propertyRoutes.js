@@ -7,6 +7,6 @@ const router = express.Router();
 
 router.route('/add-property').post(upload, addProperty);
 router.route('/all-properties').get(getProperties);
-router.route('/upate-prperty-status').post(updatePropertyStatus);
+router.route('/update-property-status').post(updatePropertyStatus);
 
 export default router;
