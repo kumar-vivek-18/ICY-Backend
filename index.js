@@ -14,7 +14,7 @@ app.use(cors({
     origin: '*',
 }))
 app.get('/', (req, res) => {
-    return res.send("Welcome to ICY Properties");
+    return res.send("Welcome to ICY Properties🎉");
 })
 
 app.use('/uploads', express.static('uploads'));
