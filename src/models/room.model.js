@@ -7,10 +7,6 @@ const roomSchema = new mongoose.Schema(
       ref: "Hotel",
       required: true,
     },
-    pricing: {
-      type: Number,
-      required: true,
-    },
     roomType: { type: String, enum: ["alpha", "beta", "gamma"] },
     day: { type: Number, required: true },
     year: { type: Number, required: true },

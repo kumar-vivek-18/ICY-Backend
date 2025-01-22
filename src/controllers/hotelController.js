@@ -21,16 +21,6 @@ export const createHotel = async (req, res) => {
       gammaPrice,
     } = req.body;
 
-    console.log(
-      name,
-      owner,
-      description,
-      hotelAmenities,
-      hotelCategory,
-      alphaRooms,
-      betaRooms,
-      gammaRooms
-    );
     if (
       !name ||
       !owner ||
@@ -66,6 +56,9 @@ export const createHotel = async (req, res) => {
       description: description,
       hotelAmenities: hotelAmenities,
       images: hotelImages,
+      alphaPrice: alphaPrice,
+      betaPrice: betaPrice,
+      gammaPrice: gammaPrice,
     });
 
     const days = [];
@@ -79,13 +72,11 @@ export const createHotel = async (req, res) => {
     if (alphaRooms > 0) {
       const alphas = await Promise.all(
         days.map(async (curr) => {
-          console.log(curr.i, curr.j, curr);
           await Room.create({
             hotelId: newHotel._id,
             roomType: "alpha",
-            day: curr.i,
-            year: curr.j,
-            pricing: alphaPrice,
+            day: curr.j,
+            year: curr.i,
             availableRooms: alphaRooms,
           });
         })
@@ -98,9 +89,8 @@ export const createHotel = async (req, res) => {
           await Room.create({
             hotelId: newHotel._id,
             roomType: "beta",
-            day: curr.i,
-            year: curr.j,
-            pricing: betaPrice,
+            day: curr.j,
+            year: curr.i,
             availableRooms: betaRooms,
           });
         })
@@ -113,9 +103,8 @@ export const createHotel = async (req, res) => {
           await Room.create({
             hotelId: newHotel._id,
             roomType: "gamma",
-            day: curr.i,
-            year: curr.j,
-            pricing: gammaPrice,
+            day: curr.j,
+            year: curr.i,
             availableRooms: gammaRooms,
           });
         })
@@ -131,28 +120,36 @@ export const createHotel = async (req, res) => {
 
 export const getHotelsByCity = async (req, res) => {
   try {
-    const { city } = req.query;
+    const { qs } = req.query;
 
-    if (!city) {
+    if (!qs) {
       return res.status(400).json({ message: "City is required." });
     }
 
     const hotels = await Hotel.find({
-      location: { $regex: city, $options: "i" },
-    }).lean();
+      $or: [
+        { hotelCity: { $regex: qs, $options: "i" } },
+        { hotelAddress: { $regex: qs, $options: "i" } },
+      ],
+    })
+      .select("_id")
+      .lean();
 
     if (!hotels || hotels.length === 0) {
-      return res.status(404).json({ message: `No hotels found in ${city}.` });
+      return res.status(404).json({ message: `No hotels found in ${qs}.` });
     }
 
+    console.log(hotels);
     const rooms = await Promise.all(
       hotels.map(async (hotel) => {
-        return Room.find({ hotelId: hotel._id }).populate("hotelId").lean();
+        return Room.find({
+          $and: [{ hotelId: hotel._id }, { day: 1 }, { year: 2025 }],
+        })
+          .populate("hotelId")
+          .lean();
       })
     );
-
     const flattenedRooms = rooms.flat();
-
     return res.status(200).json(flattenedRooms);
   } catch (error) {
     console.error("Error fetching hotels by city:", error);

@@ -82,6 +82,18 @@ const hotelSchema = new mongoose.Schema(
       totalRating: { type: Number, default: 0 },
       totalUsers: { type: Number, default: 0 },
     },
+    alphaPrice: {
+      type: Number,
+      default: 0,
+    },
+    betaPrice: {
+      type: Number,
+      default: 0,
+    },
+    gammaPrice: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );
