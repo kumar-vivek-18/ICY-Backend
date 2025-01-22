@@ -5,5 +5,3 @@ export const sendResponse = (res, status, success, message, data = null) => {
     data,
   });
 };
-
-

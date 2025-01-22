@@ -1,23 +1,23 @@
-import express from 'express';
-import dotenv from 'dotenv';
+import express from "express";
+import dotenv from "dotenv";
 import userRoutes from "./routes/userRoutes.js";
 import hotelRoutes from "./routes/hotelRoutes.js";
-import {connectDB} from "./db/db.js";
+import { connectDB } from "./db/db.js";
 import cors from "cors";
-import colors from 'colors';
+import colors from "colors";
 
 dotenv.config();
 connectDB();
 
 const app = express();
 
-app.get('/',(req,res)=>{
-    return res.send("Welcome to ICY Hotels");
+app.get("/", (req, res) => {
+  return res.send("Welcome to ICY Hotels");
 });
 
 app.use(cors());
 app.use(express.json());
-
+app.use(express.urlencoded({ extended: true }));
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/hotels", hotelRoutes);
 
