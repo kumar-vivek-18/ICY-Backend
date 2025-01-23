@@ -238,21 +238,22 @@ export const getHotelsByDate = async (req, res) => {
 };
 
 export const confirmAvailability = async (req, res) => {
-  const { hotelId, date } = req.query;
-
   try {
-    const availability = await Room.findOne({
-      hotelId,
-      date: new Date(date),
+    const { hotelId, startDate, endDate, roomsReq } = req.query;
+    if (!hotelId || !start || !end || !roomsReq)
+      return res.status(400).json({});
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    const hotel = await Room.find({
+      $and: [
+        { hotelId: hotelId },
+        { "availability.data": { $gte: start, $lte: end } },
+        { "availability.availableRooms": { $gte: roomsReq } },
+      ],
     });
-
-    if (!availability) {
-      return res
-        .status(404)
-        .json({ message: "No availability data found for the given date" });
-    }
-
-    res.status(200).json({ availableRooms: availability.availableRooms });
+    if (!hotel) return res.status(404).json({ message: "Rooms not available" });
+    return res.status(200).json(hotel);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
