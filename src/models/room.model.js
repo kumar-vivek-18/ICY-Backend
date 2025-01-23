@@ -7,10 +7,21 @@ const roomSchema = new mongoose.Schema(
       ref: "Hotel",
       required: true,
     },
-    roomType: { type: String, enum: ["alpha", "beta", "gamma"] },
-    day: { type: Number, required: true },
-    year: { type: Number, required: true },
-    availableRooms: { type: Number, required: true },
+    roomType: {
+      type: String,
+      enum: ["alpha", "beta", "gamma"],
+      required: true,
+    },
+    price: {
+      type: Number,
+      default: 0,
+    },
+    availability: [
+      {
+        date: { type: Date, required: true },
+        availableRooms: { type: Number, required: true },
+      },
+    ],
   },
   { timestamps: true }
 );

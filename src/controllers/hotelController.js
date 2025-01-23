@@ -56,60 +56,93 @@ export const createHotel = async (req, res) => {
       description: description,
       hotelAmenities: hotelAmenities,
       images: hotelImages,
-      alphaPrice: alphaPrice,
-      betaPrice: betaPrice,
-      gammaPrice: gammaPrice,
     });
 
-    const days = [];
+    let alpha, beta, gamma;
     if (alphaRooms > 0) {
-      for (let i = 2025; i <= 2027; i++) {
-        for (let j = 1; j <= 365; j++) {
-          days.push({ i, j });
-        }
-      }
-    }
-    if (alphaRooms > 0) {
-      const alphas = await Promise.all(
-        days.map(async (curr) => {
-          await Room.create({
-            hotelId: newHotel._id,
-            roomType: "alpha",
-            day: curr.j,
-            year: curr.i,
-            availableRooms: alphaRooms,
-          });
-        })
+      const today = new Date();
+      const startDate = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
       );
+      const endDate = new Date(
+        today.getFullYear() + 2,
+        today.getMonth(),
+        today.getDate()
+      );
+      const availability = [];
+      for (let d = startDate; d <= endDate; d.setDate(d.getDate() + 1)) {
+        availability.push({
+          date: new Date(d),
+          availableRooms: alphaRooms,
+        });
+      }
+
+      alpha = await Room.create({
+        hotelId: newHotel._id,
+        roomType: "alpha",
+        price: alphaPrice,
+        availability: availability,
+      });
     }
 
     if (betaRooms > 0) {
-      const alphas = await Promise.all(
-        days.map(async (curr) => {
-          await Room.create({
-            hotelId: newHotel._id,
-            roomType: "beta",
-            day: curr.j,
-            year: curr.i,
-            availableRooms: betaRooms,
-          });
-        })
+      const today = new Date();
+      const startDate = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
       );
+      const endDate = new Date(
+        today.getFullYear() + 2,
+        today.getMonth(),
+        today.getDate()
+      );
+      const availability = [];
+      for (let d = startDate; d <= endDate; d.setDate(d.getDate() + 1)) {
+        availability.push({
+          date: new Date(d),
+          availableRooms: betaRooms,
+        });
+      }
+
+      beta = await Room.create({
+        hotelId: newHotel._id,
+        roomType: "beta",
+        price: betaPrice,
+        availability: availability,
+      });
     }
 
     if (gammaRooms > 0) {
-      const alphas = await Promise.all(
-        days.map(async (curr) => {
-          await Room.create({
-            hotelId: newHotel._id,
-            roomType: "gamma",
-            day: curr.j,
-            year: curr.i,
-            availableRooms: gammaRooms,
-          });
-        })
+      const today = new Date();
+      const startDate = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
       );
+      const endDate = new Date(
+        today.getFullYear() + 2,
+        today.getMonth(),
+        today.getDate()
+      );
+      const availability = [];
+      for (let d = startDate; d <= endDate; d.setDate(d.getDate() + 1)) {
+        availability.push({
+          date: new Date(d),
+          availableRooms: gammaRooms,
+        });
+      }
+
+      gamma = await Room.create({
+        hotelId: newHotel._id,
+        roomType: "gamma",
+        price: gammaPrice,
+        availability: availability,
+      });
     }
+
     res.status(201).json(newHotel);
   } catch (error) {
     res
@@ -143,8 +176,9 @@ export const getHotelsByCity = async (req, res) => {
     const rooms = await Promise.all(
       hotels.map(async (hotel) => {
         return Room.find({
-          $and: [{ hotelId: hotel._id }, { day: 1 }, { year: 2025 }],
+          $and: [{ hotelId: hotel._id }],
         })
+          .select("hotleId roomType price")
           .populate("hotelId")
           .lean();
       })
