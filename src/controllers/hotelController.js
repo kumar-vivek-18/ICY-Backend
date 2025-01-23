@@ -46,6 +46,8 @@ export const createHotel = async (req, res) => {
       }
     }
 
+    console.log(hotelImages);
+
     const newHotel = await Hotel.create({
       name: name,
       owner: owner,
@@ -172,7 +174,6 @@ export const getHotelsByCity = async (req, res) => {
       return res.status(404).json({ message: `No hotels found in ${qs}.` });
     }
 
-    console.log(hotels);
     const rooms = await Promise.all(
       hotels.map(async (hotel) => {
         return Room.find({
@@ -183,6 +184,49 @@ export const getHotelsByCity = async (req, res) => {
           .lean();
       })
     );
+    const flattenedRooms = rooms.flat();
+    return res.status(200).json(flattenedRooms);
+  } catch (error) {
+    console.error("Error fetching hotels by city:", error);
+    return res
+      .status(500)
+      .json({ message: "An error occurred.", error: error.message });
+  }
+};
+
+export const getHotelsByDate = async (req, res) => {
+  try {
+    const { qs, startDate, endDate } = req.query;
+
+    if (!qs || !startDate || !endDate) {
+      return res
+        .status(400)
+        .json({ error: "City, startDate, and endDate are required." });
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    const hotels = await Hotel.find({
+      $or: [
+        { hotelCity: { $regex: qs, $options: "i" } },
+        { hotelAddress: { $regex: qs, $options: "i" } },
+      ],
+    })
+      .select("_id")
+      .lean();
+
+    if (!hotels || hotels.length === 0) {
+      return res.status(404).json({ message: `No hotels found in ${qs}.` });
+    }
+    const hotelIds = hotels.map((hotel) => hotel._id);
+
+    const rooms = await Room.find({
+      hotelId: { $in: hotelIds },
+      "availability.date": { $gte: start, $lte: end },
+      "availability.availableRooms": { $gt: 0 },
+    }).select("hotelId roomType availability");
+
     const flattenedRooms = rooms.flat();
     return res.status(200).json(flattenedRooms);
   } catch (error) {
