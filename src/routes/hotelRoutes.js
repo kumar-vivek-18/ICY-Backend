@@ -2,6 +2,7 @@ import express from "express";
 import {
   confirmAvailability,
   createHotel,
+  getHotelDetails,
   getHotelsByCity,
   getHotelsByDate,
   roomsNearMe,
@@ -11,9 +12,10 @@ import { uploads } from "../middlewares/multer.middleware.js";
 const router = express.Router();
 router.post("/add-hotel", uploads, createHotel);
 
-router.get("/hotels-by-city", getHotelsByCity);
-router.get("/hotels-by-dates", getHotelsByDate);
-router.get("/confirm-availability", confirmAvailability);
-router.get("/rooms-near-me", roomsNearMe);
+router.route("/hotels-by-city").get(getHotelsByCity);
+router.route("/hotels-by-dates").get(getHotelsByDate);
+router.route("/confirm-availability").get(confirmAvailability);
+router.route("/rooms-near-me").get(roomsNearMe);
+router.route("/hotel-details").get(getHotelDetails);
 
 export default router;

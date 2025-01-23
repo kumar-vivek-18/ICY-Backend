@@ -299,3 +299,17 @@ export const roomsNearMe = async (req, res) => {
       .json({ message: "Internal Server Error", error: error.message });
   }
 };
+
+export const getHotelDetails = async (req, res) => {
+  try {
+    const { hotelId } = req.query;
+
+    const HotelDetails = await Hotel.findById(hotelId);
+
+    return res.staus(200).json(HotelDetails);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
+};
