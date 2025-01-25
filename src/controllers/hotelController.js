@@ -224,7 +224,7 @@ export const getHotelsByDate = async (req, res) => {
     const rooms = await Room.find({
       hotelId: { $in: hotelIds },
       "availability.date": { $gte: start, $lte: end },
-      "availability.availableRooms": { $gt: 0 },
+      "availability.availableRooms": { $gte: roomsReq },
     }).select("-availability");
 
     const flattenedRooms = rooms.flat();
