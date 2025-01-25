@@ -303,10 +303,13 @@ export const roomsNearMe = async (req, res) => {
 export const getHotelDetails = async (req, res) => {
   try {
     const { hotelId } = req.query;
+    console.log("hotelId", hotelId);
+    if (!hotelId)
+      return res.status(400).json({ message: "Please provide hotelId" });
 
     const HotelDetails = await Hotel.findById(hotelId);
 
-    return res.staus(200).json(HotelDetails);
+    return res.status(200).json(HotelDetails);
   } catch (error) {
     return res
       .status(500)
