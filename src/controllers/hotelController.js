@@ -196,9 +196,9 @@ export const getHotelsByCity = async (req, res) => {
 
 export const getHotelsByDate = async (req, res) => {
   try {
-    const { qs, startDate, endDate } = req.query;
+    const { qs, startDate, endDate, roomsReq } = req.query;
 
-    if (!qs || !startDate || !endDate) {
+    if (!qs || !startDate || !endDate || !roomsReq) {
       return res
         .status(400)
         .json({ error: "City, startDate, and endDate are required." });
