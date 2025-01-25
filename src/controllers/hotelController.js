@@ -179,7 +179,7 @@ export const getHotelsByCity = async (req, res) => {
         return Room.find({
           $and: [{ hotelId: hotel._id }],
         })
-          .select("hotleId roomType price")
+          .select("-availability")
           .populate("hotelId")
           .lean();
       })
@@ -225,7 +225,7 @@ export const getHotelsByDate = async (req, res) => {
       hotelId: { $in: hotelIds },
       "availability.date": { $gte: start, $lte: end },
       "availability.availableRooms": { $gt: 0 },
-    }).select("hotelId roomType availability");
+    }).select("-availability");
 
     const flattenedRooms = rooms.flat();
     return res.status(200).json(flattenedRooms);
@@ -251,7 +251,7 @@ export const confirmAvailability = async (req, res) => {
         { "availability.data": { $gte: start, $lte: end } },
         { "availability.availableRooms": { $gte: roomsReq } },
       ],
-    });
+    }).select("-availability");
     if (!hotel) return res.status(404).json({ message: "Rooms not available" });
     return res.status(200).json(hotel);
   } catch (err) {
@@ -263,13 +263,18 @@ export const roomsNearMe = async (req, res) => {
   try {
     const { lon, lat } = req.query;
 
-    if (!lat || !lon)
-      return res
-        .status(400)
-        .json({ message: "Langitude and Latitude are required" });
+    // Validate latitude and longitude
+    if (!lat || !lon || isNaN(lat) || isNaN(lon)) {
+      return res.status(400).json({
+        message:
+          "Latitude and Longitude are required and must be valid numbers.",
+      });
+    }
+
+    console.log(lon, lat);
 
     const hotels = await Hotel.find({
-      "location.coords": {
+      coords: {
         $near: {
           $geometry: {
             type: "Point",
@@ -281,12 +286,15 @@ export const roomsNearMe = async (req, res) => {
     });
 
     if (!hotels || hotels.length === 0) {
-      return res.status(404).json({ message: `No hotels found in ${city}.` });
+      return res.status(404).json({ message: "No hotels found nearby." });
     }
 
     const rooms = await Promise.all(
       hotels.map(async (hotel) => {
-        return Room.find({ hotelId: hotel._id }).populate("hotelId").lean();
+        return Room.find({ hotelId: hotel._id })
+          .select("-availability")
+          .populate("hotelId")
+          .lean();
       })
     );
 
@@ -294,9 +302,11 @@ export const roomsNearMe = async (req, res) => {
 
     return res.status(200).json(flattenedRooms);
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Internal Server Error", error: error.message });
+    console.error("Error fetching rooms near user:", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 };
 

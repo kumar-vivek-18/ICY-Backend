@@ -26,11 +26,12 @@ const hotelSchema = new mongoose.Schema(
       type: {
         type: String,
         enum: ["Point"],
-        default: "Point",
+        default: "Point", // The "type" field is mandatory for geospatial queries.
       },
       coordinates: {
         type: [Number],
-        default: [0, 0],
+        default: [0, 0], // Default value, but should be updated with real coordinates.
+        required: true, // Ensure coordinates are always present.
       },
     },
     description: { type: String, required: true },
@@ -85,33 +86,6 @@ const hotelSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
-// hotelSchema.post("save", async function (hotel) {
-//   const startDate = new Date();
-//   const endDate = new Date();
-//   endDate.setDate(startDate.getDate() + 30);
-
-//   let currentDate = new Date(startDate);
-
-//   while (currentDate <= endDate) {
-//     const existingAvailability = await Room.findOne({
-//       hotelId: hotel._id,
-//       date: currentDate,
-//     });
-
-//     if (!existingAvailability) {
-//       // Create room availability record for each day
-//       await Room.create({
-//         hotelId: hotel._id,
-//         date: currentDate,
-//         availableRooms: hotel.totalRooms, // Initially set available rooms to total rooms
-//         bookedRooms: 0,
-//       });
-//     }
-
-//     // Move to the next day
-//     currentDate.setDate(currentDate.getDate() + 1);
-//   }
-// });
+hotelSchema.index({ coords: "2dsphere" });
 
 export const Hotel = mongoose.model("Hotel", hotelSchema);
