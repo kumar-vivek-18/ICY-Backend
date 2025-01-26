@@ -39,9 +39,9 @@ export const checkUser = async (req, res) => {
 
 export const createUser = async (req, res) => {
   try {
-    const { phoneNumber, name } = req.body;
+    const { phoneNumber, name, email, gender } = req.body;
 
-    if (!phoneNumber)
+    if (!phoneNumber || !name || !gender || !email)
       return res.status(400).json({
         success: false,
         message: "phone number is required",
@@ -55,7 +55,13 @@ export const createUser = async (req, res) => {
       });
     }
 
-    const newUser = await User.create({ phoneNumber: phoneNumber, name: name });
+    const newUser = await User.create({
+      phoneNumber: phoneNumber,
+      name: name,
+      email: email,
+      gender: gender,
+    });
+
     return res.status(201).json({
       success: true,
       message: "User created successfully",

@@ -21,7 +21,8 @@ const userSchema = new mongoose.Schema({
   },
   userImage: {
     type: String,
-    default: "",
+    default:
+      "https://res.cloudinary.com/dojp57ix9/image/upload/v1737902477/user-front-side-with-white-background_wnlxvu.jpg",
   },
 });
 
