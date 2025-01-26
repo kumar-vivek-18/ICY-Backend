@@ -326,3 +326,15 @@ export const getHotelDetails = async (req, res) => {
       .json({ message: "Internal server error", error: error.message });
   }
 };
+
+export const getAllHotels = async (req, res) => {
+  try {
+    const hotels = await Hotel.find();
+
+    return res.status(200).json(hotels);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
+};

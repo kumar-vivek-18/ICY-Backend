@@ -2,6 +2,7 @@ import express from "express";
 import {
   confirmAvailability,
   createHotel,
+  getAllHotels,
   getHotelDetails,
   getHotelsByCity,
   getHotelsByDate,
@@ -17,5 +18,5 @@ router.route("/hotels-by-dates").get(getHotelsByDate);
 router.route("/confirm-availability").get(confirmAvailability);
 router.route("/rooms-near-me").get(roomsNearMe);
 router.route("/hotel-details").get(getHotelDetails);
-
+router.route("/all-hotels").get(getAllHotels);
 export default router;
