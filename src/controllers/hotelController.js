@@ -225,7 +225,10 @@ export const getHotelsByDate = async (req, res) => {
       hotelId: { $in: hotelIds },
       "availability.date": { $gte: start, $lte: end },
       "availability.availableRooms": { $gte: roomsReq },
-    }).select("-availability");
+    })
+      .select("-availability")
+      .populate("hotelId")
+      .lean();
 
     const flattenedRooms = rooms.flat();
     return res.status(200).json(flattenedRooms);
@@ -240,7 +243,7 @@ export const getHotelsByDate = async (req, res) => {
 export const confirmAvailability = async (req, res) => {
   try {
     const { hotelId, startDate, endDate, roomsReq } = req.query;
-    if (!hotelId || !start || !end || !roomsReq)
+    if (!hotelId || !startDate || !endDate || !roomsReq)
       return res.status(400).json({});
     const start = new Date(startDate);
     const end = new Date(endDate);
