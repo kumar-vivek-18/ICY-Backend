@@ -247,7 +247,6 @@ export const confirmAvailability = async (req, res) => {
       return res.status(400).json({});
     const start = new Date(startDate);
     const end = new Date(endDate);
-    console.log(start, end);
     const hotel = await Room.findOne({
       $and: [
         { hotelId: hotelId },
@@ -255,7 +254,6 @@ export const confirmAvailability = async (req, res) => {
         { "availability.availableRooms": { $gte: roomsReq } },
       ],
     }).select("-availability");
-    console.log(hotel);
     if (!hotel) return res.status(404).json({ message: "Rooms not available" });
     return res.status(200).json(hotel);
   } catch (err) {
@@ -333,7 +331,15 @@ export const getHotelDetails = async (req, res) => {
 
 export const getAllHotels = async (req, res) => {
   try {
-    const hotels = await Hotel.find();
+    let { query } = req.query;
+    if (!query) query = "";
+    const hotels = await Hotel.find({
+      $or: [
+        { hotelCity: { $regex: query, $options: "i" } },
+        { hotelAddress: { $regex: query, $options: "i" } },
+        { name: { $regex: query, $options: "i" } },
+      ],
+    });
 
     return res.status(200).json(hotels);
   } catch (error) {
