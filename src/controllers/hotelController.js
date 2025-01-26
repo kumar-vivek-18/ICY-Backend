@@ -339,9 +339,25 @@ export const getAllHotels = async (req, res) => {
         { hotelAddress: { $regex: query, $options: "i" } },
         { name: { $regex: query, $options: "i" } },
       ],
-    });
+    })
+      .select("_id")
+      .lean();
 
-    return res.status(200).json(hotels);
+    if (!hotels || hotels.length === 0) {
+      return res.status(404).json({ message: `No hotels found in ${qs}.` });
+    }
+    const hotelIds = hotels.map((hotel) => hotel._id);
+
+    const rooms = await Room.find({
+      hotelId: { $in: hotelIds },
+      "availability.availableRooms": { $gte: 0 },
+    })
+      .select("-availability")
+      .populate("hotelId")
+      .lean();
+
+    const flattenedRooms = rooms.flat();
+    return res.status(200).json(flattenedRooms);
   } catch (error) {
     return res
       .status(500)
