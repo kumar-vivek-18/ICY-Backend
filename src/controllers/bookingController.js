@@ -29,13 +29,7 @@ export const createBooking = async (req, res) => {
     const savedBooking = await newBooking.save();
 
     const populatedBooking = await Booking.findById(savedBooking._id)
-      .populate({
-        path: "room",
-        select: "roomType",
-        populate: {
-          path: "hotel",
-        },
-      })
+      .populate("room", "-availability")
       .lean();
 
     res.status(201).json(populatedBooking);
