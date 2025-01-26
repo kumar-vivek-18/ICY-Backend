@@ -247,14 +247,15 @@ export const confirmAvailability = async (req, res) => {
       return res.status(400).json({});
     const start = new Date(startDate);
     const end = new Date(endDate);
-
-    const hotel = await Room.find({
+    console.log(start, end);
+    const hotel = await Room.findOne({
       $and: [
         { hotelId: hotelId },
-        { "availability.data": { $gte: start, $lte: end } },
+        { "availability.date": { $gte: start, $lte: end } },
         { "availability.availableRooms": { $gte: roomsReq } },
       ],
     }).select("-availability");
+    console.log(hotel);
     if (!hotel) return res.status(404).json({ message: "Rooms not available" });
     return res.status(200).json(hotel);
   } catch (err) {
