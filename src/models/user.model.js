@@ -10,9 +10,18 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
+  gender: {
+    type: String,
+    enum: ["Male", "Female", "Select Gender"],
+    default: "Select Gender",
+  },
+  email: {
+    type: String,
+    default: "user@gmail.com",
+  },
+  userImage: {
+    type: String,
+    default: "",
   },
 });
 
