@@ -45,13 +45,7 @@ export const upcomingBookings = async (req, res) => {
     const { userId } = req.query;
 
     const bookings = await Booking.find({ user: userId, status: "Confirmed" })
-      .populate({
-        path: "room",
-        select: "roomType",
-        populate: {
-          path: "hotel",
-        },
-      })
+      .populate("room", "-availability")
       .lean();
     res.status(200).json({ success: true, bookings });
   } catch (error) {
@@ -66,13 +60,7 @@ export const bookingHistory = async (req, res) => {
     const { userId } = req.query;
 
     const bookings = await Booking.find({ user: userId, status: "Completed" })
-      .populate({
-        path: "room",
-        select: "roomType",
-        populate: {
-          path: "hotel",
-        },
-      })
+      .populate("room", "-availability")
       .lean();
     res.status(200).json({ success: true, bookings });
   } catch (error) {
