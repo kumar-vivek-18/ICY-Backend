@@ -3,7 +3,7 @@ import { uploadFileToCloudinary } from "../utils/cloudinary.js";
 
 export const checkUser = async (req, res) => {
   try {
-    let { phoneNumber } = req.query;
+    const { phoneNumber } = req.query;
 
     if (!phoneNumber)
       return res.status(400).json({
@@ -11,8 +11,6 @@ export const checkUser = async (req, res) => {
         message: "Phone number is required",
       });
 
-    phoneNumber = "+91" + phoneNumber;
-    console.log("phoneNumber", phoneNumber);
     const existingUser = await User.findOne({ phoneNumber: phoneNumber });
 
     if (!existingUser)
