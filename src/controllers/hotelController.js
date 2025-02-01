@@ -229,6 +229,7 @@ export const getHotelsByDate = async (req, res) => {
     })
       .select("-availability")
       .populate("hotelId")
+      .sort({ price: 1 })
       .lean();
 
     const flattenedRooms = rooms.flat();
