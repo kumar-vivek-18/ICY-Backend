@@ -181,6 +181,7 @@ export const getHotelsByCity = async (req, res) => {
         })
           .select("-availability")
           .populate("hotelId")
+          .sort({ price: 1 })
           .lean();
       })
     );
@@ -253,7 +254,10 @@ export const confirmAvailability = async (req, res) => {
         { "availability.date": { $gte: start, $lte: end } },
         { "availability.availableRooms": { $gte: roomsReq } },
       ],
-    }).select("-availability");
+    })
+      .select("-availability")
+      .sort({ price: 1 })
+      .lean();
     if (!hotel) return res.status(404).json({ message: "Rooms not available" });
     return res.status(200).json(hotel);
   } catch (err) {
@@ -285,7 +289,9 @@ export const roomsNearMe = async (req, res) => {
           $maxDistance: 15000,
         },
       },
-    });
+    })
+      .select("_id")
+      .lean();
 
     if (!hotels || hotels.length === 0) {
       return res.status(404).json({ message: "No hotels found nearby." });
@@ -296,6 +302,7 @@ export const roomsNearMe = async (req, res) => {
         return Room.find({ hotelId: hotel._id })
           .select("-availability")
           .populate("hotelId")
+          .sort({ price: 1 })
           .lean();
       })
     );
@@ -354,6 +361,7 @@ export const getAllHotels = async (req, res) => {
     })
       .select("-availability")
       .populate("hotelId")
+      .sort({ price: 1 })
       .lean();
 
     const flattenedRooms = rooms.flat();
