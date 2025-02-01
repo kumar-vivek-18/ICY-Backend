@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import userRoutes from "./routes/userRoutes.js";
 import hotelRoutes from "./routes/hotelRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
+import ratingRoutes from "./routes/ratingRoutes.js";
 import { connectDB } from "./db/db.js";
 import cors from "cors";
 import colors from "colors";
@@ -22,6 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/hotels", hotelRoutes);
 app.use("/api/v1/booking", bookingRoutes);
+app.use("/api/v1/rating", ratingRoutes);
 
 const PORT = process.env.PORT || 5000;
 

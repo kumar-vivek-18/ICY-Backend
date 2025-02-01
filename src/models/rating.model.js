@@ -1,6 +1,6 @@
-import mongoose, { mongo, Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-const Schema = new Schema({
+const ratingSchema = new Schema({
   hotelId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Hotel",
@@ -21,4 +21,4 @@ const Schema = new Schema({
   },
 });
 
-export const Hotel = mongoose.model("Hotel", Schema);
+export const Rating = mongoose.model("Rating", ratingSchema);
