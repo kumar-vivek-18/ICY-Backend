@@ -76,7 +76,7 @@ const hotelSchema = new mongoose.Schema(
         "Breakfast",
         "Music System",
       ],
-      default: [], // Default empty array
+      default: [],
     },
     images: { type: [String], default: [] },
     ratings: {

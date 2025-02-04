@@ -176,17 +176,17 @@ export const getHotelsByCity = async (req, res) => {
 
     const rooms = await Promise.all(
       hotels.map(async (hotel) => {
-        return Room.find({
+        const hotelDetails = await Hotel.findById(hotel._id);
+        const roomDetails = await Room.find({
           $and: [{ hotelId: hotel._id }],
         })
-          .select("-availability")
-          .populate("hotelId")
+          .select("-availability -hotelId -createdAt -updatedAt")
           .sort({ price: 1 })
           .lean();
+        return [hotelDetails, ...roomDetails];
       })
     );
-    const flattenedRooms = rooms.flat();
-    return res.status(200).json(flattenedRooms);
+    return res.status(200).json(rooms);
   } catch (error) {
     console.error("Error fetching hotels by city:", error);
     return res
@@ -200,9 +200,7 @@ export const getHotelsByDate = async (req, res) => {
     const { qs, startDate, endDate, roomsReq } = req.query;
 
     if (!qs || !startDate || !endDate || !roomsReq) {
-      return res
-        .status(400)
-        .json({ error: "City, startDate, and endDate are required." });
+      return res.status(400).json({ error: "All fields are required." });
     }
 
     const start = new Date(startDate);
@@ -222,18 +220,34 @@ export const getHotelsByDate = async (req, res) => {
     }
     const hotelIds = hotels.map((hotel) => hotel._id);
 
-    const rooms = await Room.find({
-      hotelId: { $in: hotelIds },
-      "availability.date": { $gte: start, $lte: end },
-      "availability.availableRooms": { $gte: roomsReq },
-    })
-      .select("-availability")
-      .populate("hotelId")
-      .sort({ price: 1 })
-      .lean();
+    const rooms = await Promise.all(
+      hotels.map(async (hotel) => {
+        const hotelDetails = await Hotel.findById(hotel._id);
+        const roomDetails = await Room.find({
+          $and: [
+            { hotelId: hotel._id },
+            { "availability.date": { $gte: start, $lte: end } },
+            { "availability.availableRooms": { $gte: roomsReq } },
+          ],
+        })
+          .select("-availability -hotelId -createdAt -updatedAt")
+          .sort({ price: 1 })
+          .lean();
+        return [hotelDetails, ...roomDetails];
+      })
+    );
+    // const rooms = await Room.find({
+    //   hotelId: { $in: hotelIds },
+    //   "availability.date": { $gte: start, $lte: end },
+    //   "availability.availableRooms": { $gte: roomsReq },
+    // })
+    //   .select("-availability")
+    //   .populate("hotelId")
+    //   .sort({ price: 1 })
+    //   .lean();
 
-    const flattenedRooms = rooms.flat();
-    return res.status(200).json(flattenedRooms);
+    // const flattenedRooms = rooms.flat();
+    return res.status(200).json(rooms);
   } catch (error) {
     console.error("Error fetching hotels by city:", error);
     return res
@@ -244,20 +258,20 @@ export const getHotelsByDate = async (req, res) => {
 
 export const confirmAvailability = async (req, res) => {
   try {
-    const { hotelId, startDate, endDate, roomsReq } = req.query;
-    if (!hotelId || !startDate || !endDate || !roomsReq)
+    const { hotelId, roomType, startDate, endDate, roomsReq } = req.query;
+    if (!hotelId || !roomType || !startDate || !endDate || !roomsReq)
       return res.status(400).json({});
     const start = new Date(startDate);
     const end = new Date(endDate);
     const hotel = await Room.findOne({
       $and: [
         { hotelId: hotelId },
+        { roomType: roomType },
         { "availability.date": { $gte: start, $lte: end } },
         { "availability.availableRooms": { $gte: roomsReq } },
       ],
     })
-      .select("-availability")
-      .sort({ price: 1 })
+      .select("-availability -hotelId -createdAt -updatedAt")
       .lean();
     if (!hotel) return res.status(404).json({ message: "Rooms not available" });
     return res.status(200).json(hotel);
@@ -270,15 +284,12 @@ export const roomsNearMe = async (req, res) => {
   try {
     const { lon, lat } = req.query;
 
-    // Validate latitude and longitude
     if (!lat || !lon || isNaN(lat) || isNaN(lon)) {
       return res.status(400).json({
         message:
           "Latitude and Longitude are required and must be valid numbers.",
       });
     }
-
-    console.log(lon, lat);
 
     const hotels = await Hotel.find({
       coords: {
@@ -300,17 +311,20 @@ export const roomsNearMe = async (req, res) => {
 
     const rooms = await Promise.all(
       hotels.map(async (hotel) => {
-        return Room.find({ hotelId: hotel._id })
-          .select("-availability")
-          .populate("hotelId")
+        const hotelDetails = await Hotel.findById(hotel._id);
+        const roomDetails = await Room.find({
+          $and: [{ hotelId: hotel._id }],
+        })
+          .select("-availability -hotelId -createdAt -updatedAt")
           .sort({ price: 1 })
           .lean();
+        return [hotelDetails, ...roomDetails];
       })
     );
 
-    const flattenedRooms = rooms.flat();
+    // const flattenedRooms = rooms.flat();
 
-    return res.status(200).json(flattenedRooms);
+    return res.status(200).json(rooms);
   } catch (error) {
     console.error("Error fetching rooms near user:", error);
     return res.status(500).json({
@@ -354,19 +368,23 @@ export const getAllHotels = async (req, res) => {
     if (!hotels || hotels.length === 0) {
       return res.status(404).json({ message: `No hotels found in ${qs}.` });
     }
-    const hotelIds = hotels.map((hotel) => hotel._id);
+    // const hotelIds = hotels.map((hotel) => hotel._id);
 
-    const rooms = await Room.find({
-      hotelId: { $in: hotelIds },
-      "availability.availableRooms": { $gte: 0 },
-    })
-      .select("-availability")
-      .populate("hotelId")
-      .sort({ price: 1 })
-      .lean();
+    const rooms = await Promise.all(
+      hotels.map(async (hotel) => {
+        const hotelDetails = await Hotel.findById(hotel._id);
+        const roomDetails = await Room.find({
+          $and: [{ hotelId: hotel._id }],
+        })
+          .select("-availability -hotelId -createdAt -updatedAt")
+          .sort({ price: 1 })
+          .lean();
+        return [hotelDetails, ...roomDetails];
+      })
+    );
 
-    const flattenedRooms = rooms.flat();
-    return res.status(200).json(flattenedRooms);
+    // const flattenedRooms = rooms.flat();
+    return res.status(200).json(rooms);
   } catch (error) {
     return res
       .status(500)
