@@ -40,14 +40,17 @@ export const getAllReviews = async (req, res) => {
       hotelId: hotelId,
       userId: { $ne: userId },
       feedback: { $ne: "" },
-    });
+    }).populate("userId", "name userImage");
     if (!allRatings)
       return res
         .status(409)
         .json({ message: "Error occured while creating rating" });
     let userRating = {};
     if (userId)
-      userRating = await Rating.findOne({ hotelId: hotelId, userId: userId });
+      userRating = await Rating.findOne({
+        hotelId: hotelId,
+        userId: userId,
+      }).populate("userId", "name userImage");
 
     if (!allRatings)
       return res
