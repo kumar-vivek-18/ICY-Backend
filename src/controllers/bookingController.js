@@ -82,13 +82,43 @@ export const bookingHistory = async (req, res) => {
 
 export const updateBookingStatus = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { status, paymentStatus } = req.body;
+    const { bookingId, status } = req.body;
+
+    if (!bookingId || !status)
+      return res.status(400).json({ message: "Invalid data" });
+    const updatedBooking = await Booking.findByIdAndUpdate(
+      bookingId,
+      { status },
+      { new: true }
+    );
+
+    if (!updatedBooking) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Booking not found" });
+    }
+
+    res.status(200).json({ success: true, booking: updatedBooking });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error updating booking status",
+      error,
+    });
+  }
+};
+
+export const updatePaymentStatus = async (req, res) => {
+  try {
+    const { bookingId, paymentStatus, transactionId } = req.body;
+
+    if ((!bookingId || !paymentStatus, !transactionId))
+      return res.status(400).json({ message: "Invalid data" });
 
     const updatedBooking = await Booking.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true } // Return the updated document
+      bookingId,
+      { paymentStatus, transactionId },
+      { new: true }
     );
 
     if (!updatedBooking) {
