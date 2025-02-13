@@ -43,15 +43,25 @@ export const createBooking = async (req, res) => {
 export const upcomingBookings = async (req, res) => {
   try {
     const { userId } = req.query;
-
-    const bookings = await Booking.find({ user: userId, status: "Confirmed" })
+    console.log("user", userId);
+    if (!userId) return res.status(400).json({ message: "UserId is required" });
+    const bookings = await Booking.find({
+      user: userId,
+      status: "Confirmed",
+    })
       .populate("room", "-availability")
-      .lean();
+      .sort({ createdAt: -1 });
+    // for (const booking of bookings) {
+    //   const hotelDetails = await booking.hotelDetails();
+    //   booking.hotelDetails = hotelDetails;
+    // }
     res.status(200).json({ success: true, bookings });
   } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: "Error fetching bookings", error });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching bookings",
+      error: error.message,
+    });
   }
 };
 

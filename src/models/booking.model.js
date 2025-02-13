@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { Hotel } from "./hotel.model.js";
 
 const bookingSchema = new mongoose.Schema(
   {
@@ -25,5 +26,23 @@ const bookingSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+bookingSchema.methods.hotelDetails = async function () {
+  if (!this.room) {
+    throw new Error("Room reference not found");
+  }
+
+  const room = await mongoose
+    .model("Room")
+    .findById(this.room)
+    .select("-availability")
+    .lean();
+  if (!room || !room.hotelId) {
+    throw new Error("Hotel reference not found in room");
+  }
+  let hotelId = room.hotelId.toString();
+  const hotelDetails = await mongoose.model("Hotel").findById(hotelId);
+  return hotelDetails;
+};
 
 export const Booking = mongoose.model("Booking", bookingSchema);

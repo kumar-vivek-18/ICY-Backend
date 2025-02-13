@@ -12,6 +12,6 @@ const router = express.Router();
 router.route("/check-user").get(checkUser);
 router.route("/create-user").post(createUser);
 router.route("/update-user-profile").patch(updateUserProfile);
-router.route("/update-user-image").post(uploads, updateImage);
+router.route("/update-user-image").patch(uploads, updateImage);
 
 export default router;
