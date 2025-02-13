@@ -19,6 +19,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "user@gmail.com",
   },
+  location: {
+    type: String,
+    default: "update location",
+  },
   userImage: {
     type: String,
     default:
